@@ -97,32 +97,45 @@ print_success "Backups saved to $backup_dir"
 
 print_step "Deploying Omarchy configurations..."
 
+# Get script directory
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 # Deploy yabai config
-if [ -f "$HOME/.yabairc.omarchy" ]; then
-    cp "$HOME/.yabairc.omarchy" "$HOME/.yabairc"
+if [ -f "$SCRIPT_DIR/configs/yabairc" ]; then
+    cp "$SCRIPT_DIR/configs/yabairc" "$HOME/.yabairc"
     chmod +x "$HOME/.yabairc"
     print_success "yabai config deployed"
 else
-    print_warning "yabairc.omarchy not found, skipping"
+    print_error "yabairc not found in $SCRIPT_DIR/configs/"
+    exit 1
 fi
 
 # Deploy skhd config
-if [ -f "$HOME/.skhdrc.omarchy" ]; then
-    cp "$HOME/.skhdrc.omarchy" "$HOME/.skhdrc"
+if [ -f "$SCRIPT_DIR/configs/skhdrc" ]; then
+    cp "$SCRIPT_DIR/configs/skhdrc" "$HOME/.skhdrc"
     chmod +x "$HOME/.skhdrc"
     print_success "skhd config deployed"
 else
-    print_warning "skhdrc.omarchy not found, skipping"
+    print_error "skhdrc not found in $SCRIPT_DIR/configs/"
+    exit 1
 fi
 
 # Create config directories
 mkdir -p "$HOME/.config/"{yabai,skhd,sketchybar,borders}
 
-# Make scripts executable
-if [ -d "$HOME/.config/sketchybar/plugins" ]; then
+# Deploy SketchyBar configs
+if [ -d "$SCRIPT_DIR/configs/sketchybar" ]; then
+    cp -r "$SCRIPT_DIR/configs/sketchybar/"* "$HOME/.config/sketchybar/"
     chmod +x "$HOME/.config/sketchybar/sketchybarrc"
     chmod +x "$HOME/.config/sketchybar/plugins/"*.sh
     print_success "SketchyBar configs deployed"
+fi
+
+# Deploy borders config
+if [ -d "$SCRIPT_DIR/configs/borders" ]; then
+    cp -r "$SCRIPT_DIR/configs/borders/"* "$HOME/.config/borders/"
+    chmod +x "$HOME/.config/borders/bordersrc"
+    print_success "Borders config deployed"
 fi
 
 # ====================================================================
@@ -148,18 +161,29 @@ read -p "Press Enter after granting permissions..."
 
 print_step "Starting services..."
 
-# Stop existing services
-brew services stop yabai 2>/dev/null || true
-brew services stop skhd 2>/dev/null || true
-brew services stop sketchybar 2>/dev/null || true
-brew services stop borders 2>/dev/null || true
+# Stop existing processes
+killall yabai 2>/dev/null || true
+killall skhd 2>/dev/null || true
+killall sketchybar 2>/dev/null || true
+killall borders 2>/dev/null || true
 
-# Start services
-brew services start yabai
-brew services start skhd
-brew services start sketchybar
-brew services start borders
+# Start yabai
+yabai &
+print_success "yabai started"
 
+# Start skhd
+skhd &
+print_success "skhd started"
+
+# Start sketchybar
+sketchybar &
+print_success "sketchybar started"
+
+# Start borders
+borders &
+print_success "borders started"
+
+sleep 2
 print_success "All services started"
 
 # ====================================================================
@@ -184,7 +208,9 @@ echo
 if [[ $REPLY =~ ^[Yy]$ ]]; then
     print_success "Great! Restarting yabai with scripting addition..."
     sudo yabai --load-sa
-    brew services restart yabai
+    killall yabai
+    yabai &
+    sleep 1
 fi
 
 # ====================================================================
@@ -224,7 +250,10 @@ echo "  ~/.config/borders/"
 echo ""
 echo "Troubleshooting:"
 echo "  • View logs: tail -f /tmp/yabai_*.log"
-echo "  • Restart yabai: brew services restart yabai"
+echo "  • Restart yabai: killall yabai && yabai &"
+echo "  • Restart skhd: killall skhd && skhd &"
+echo "  • Restart sketchybar: killall sketchybar && sketchybar &"
+echo "  • Restart borders: killall borders && borders &"
 echo "  • Restart skhd: brew services restart skhd"
 echo ""
 print_success "Enjoy your new setup!"
