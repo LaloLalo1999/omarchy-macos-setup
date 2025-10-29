@@ -1,0 +1,134 @@
+#!/usr/bin/env sh
+
+# ====================================================================
+# OMARCHY-INSPIRED YABAI CONFIGURATION
+# Hyprland-like setup for macOS
+# ====================================================================
+
+# Load scripting addition (requires SIP partially disabled)
+# Uncomment after configuring sudoers
+# yabai -m signal --add event=dock_did_restart action="sudo yabai --load-sa"
+# sudo yabai --load-sa
+
+# ====================================================================
+# GLOBAL SETTINGS
+# ====================================================================
+
+yabai -m config \
+    external_bar                 all:32:0 \
+    menubar_opacity              1.0 \
+    mouse_follows_focus          off \
+    focus_follows_mouse          autofocus \
+    display_arrangement_order    default \
+    window_origin_display        focused \
+    window_placement             second_child \
+    window_zoom_persist          on \
+    window_shadow                on \
+    window_animation_duration    0.25 \
+    window_animation_easing      ease_out_expo \
+    window_opacity_duration      0.2 \
+    active_window_opacity        1.0 \
+    normal_window_opacity        0.92 \
+    window_opacity               on \
+    insert_feedback_color        0xffd75f5f \
+    split_ratio                  0.50 \
+    split_type                   auto \
+    auto_balance                 off \
+    mouse_modifier               fn \
+    mouse_action1                move \
+    mouse_action2                resize \
+    mouse_drop_action            swap
+
+# ====================================================================
+# LAYOUT
+# ====================================================================
+
+# Default to BSP (Binary Space Partitioning) like Hyprland
+yabai -m config layout bsp
+
+# ====================================================================
+# PADDING AND GAPS (Hyprland-inspired)
+# ====================================================================
+
+yabai -m config \
+    top_padding                  10 \
+    bottom_padding               10 \
+    left_padding                 10 \
+    right_padding                10 \
+    window_gap                   8
+
+# ====================================================================
+# SPACE-SPECIFIC CONFIGURATIONS
+# ====================================================================
+
+# Label spaces for easy reference
+yabai -m space 1 --label web
+yabai -m space 2 --label code
+yabai -m space 3 --label term
+yabai -m space 4 --label comm
+yabai -m space 5 --label media
+yabai -m space 6 --label misc
+
+# ====================================================================
+# WINDOW RULES
+# ====================================================================
+
+# Float system preferences and utilities
+yabai -m rule --add app="^System.*Preferences$" manage=off
+yabai -m rule --add app="^System Settings$" manage=off
+yabai -m rule --add app="^Archive Utility$" manage=off
+yabai -m rule --add app="^Finder$" title="^(Copy|Info|Preferences)$" manage=off
+yabai -m rule --add app="^Activity Monitor$" manage=off
+yabai -m rule --add app="^Calculator$" manage=off
+yabai -m rule --add app="^Dictionary$" manage=off
+yabai -m rule --add app="^Software Update$" manage=off
+yabai -m rule --add app="^About This Mac$" manage=off
+yabai -m rule --add title="^(Opening|Preferences|Settings)$" manage=off
+
+# Float smaller utility windows
+yabai -m rule --add app="^Raycast$" manage=off
+yabai -m rule --add app="^Alfred.*$" manage=off
+yabai -m rule --add app="^1Password$" manage=off
+
+# Picture-in-picture
+yabai -m rule --add title="^Picture.in.Picture$" manage=off sticky=on
+
+# Workspace assignments (like Hyprland)
+yabai -m rule --add app="^Safari$" space=web
+yabai -m rule --add app="^Google Chrome$" space=web
+yabai -m rule --add app="^Firefox$" space=web
+yabai -m rule --add app="^Arc$" space=web
+
+yabai -m rule --add app="^(Code|VSCode|Visual Studio Code|Cursor)$" space=code
+yabai -m rule --add app="^Xcode$" space=code
+yabai -m rule --add app="^IntelliJ.*$" space=code
+
+yabai -m rule --add app="^(Terminal|iTerm|Alacritty|kitty|Warp)$" space=term
+
+yabai -m rule --add app="^Slack$" space=comm
+yabai -m rule --add app="^Discord$" space=comm
+yabai -m rule --add app="^Telegram$" space=comm
+yabai -m rule --add app="^WhatsApp$" space=comm
+
+yabai -m rule --add app="^Spotify$" space=media
+yabai -m rule --add app="^Music$" space=media
+yabai -m rule --add app="^VLC$" space=media
+
+# Set opacity for specific apps
+yabai -m rule --add app="^Terminal$" opacity=0.95
+yabai -m rule --add app="^iTerm2$" opacity=0.95
+yabai -m rule --add app="^Alacritty$" opacity=0.95
+
+# ====================================================================
+# SIGNALS (for status bar integration)
+# ====================================================================
+
+# Refresh SketchyBar on window events
+yabai -m signal --add event=window_focused action="sketchybar --trigger window_focus"
+yabai -m signal --add event=window_created action="sketchybar --trigger windows_on_spaces"
+yabai -m signal --add event=window_destroyed action="sketchybar --trigger windows_on_spaces"
+yabai -m signal --add event=window_title_changed action="sketchybar --trigger title_change"
+yabai -m signal --add event=space_changed action="sketchybar --trigger space_change"
+yabai -m signal --add event=display_changed action="sketchybar --trigger display_change"
+
+echo "✅ Omarchy-style yabai configuration loaded!"

@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# ====================================================================
+# BORDERS CONFIGURATION (JankyBorders)
+# Colored borders around active window (Hyprland-style)
+# ====================================================================
+
+options=(
+    style=round
+    width=5.0
+    hidpi=on
+    active_color=0xff89b4fa
+    inactive_color=0xff313244
+)
+
+borders "${options[@]}"
